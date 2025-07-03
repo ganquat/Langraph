@@ -16,7 +16,7 @@ if not api_key:
 
 # Initialize the Gemini model
 # Note: Adjust model_name if needed, e.g., "gemini-1.5-flash"
-llm = ChatGoogleGenerativeAI(model="gemini-1.0-pro", google_api_key=api_key)
+llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key)
 
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
