@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph Gemini Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #5a5a5a; }
+        textarea { width: 95%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        .response { margin-top: 20px; padding: 15px; background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; white-space: pre-wrap; } /* Added white-space: pre-wrap */
+        .error { margin-top: 20px; padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 4px; }
+        .loader { display: none; margin: 10px auto; border: 4px solid #f3f3f3; border-radius: 50%; border-top: 4px solid #3498db; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Agent Chat (LangGraph + Gemini + Flask)</h1>
+        <textarea id="userInput" placeholder="Enter your message here..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+        <div class="loader" id="loader"></div>
+        <div id="responseArea"></div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            const responseArea = document.getElementById('responseArea');
+            const loader = document.getElementById('loader');
+
+            if (!userInput.trim()) {
+                responseArea.innerHTML = '<div class="error">Please enter a message.</div>';
+                return;
+            }
+
+            responseArea.innerHTML = ''; // Clear previous response/error
+            loader.style.display = 'block'; // Show loader
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userInput }),
+                });
+
+                loader.style.display = 'none'; // Hide loader
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.details || `Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                responseArea.innerHTML = `<div class="response"><strong>Agent:</strong> ${data.response}</div>`;
+            } catch (error) {
+                loader.style.display = 'none'; // Hide loader
+                responseArea.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+                console.error('Fetch error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
